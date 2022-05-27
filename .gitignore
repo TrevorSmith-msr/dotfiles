@@ -1,1 +1,12 @@
 /**
+
+!/.aws
+!/.aws/config
+
+!/.ddg
+!/.ddg/default.yml
+!/.ddg/bin
+!/.ddg/bin/ddg
+
+!/.zprofile
+!/.zshrc
