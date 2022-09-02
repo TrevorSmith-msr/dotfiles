@@ -5,10 +5,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-export JAVA_HOME=$(/usr/libexec/java_home -v 11)
-export TZ=UTC
-export PATH="$HOME/.ddg/bin:$PATH"
-
 . $(brew --prefix)/opt/asdf/libexec/asdf.sh
 
 # Add direnv to the zsh shell
@@ -41,3 +37,5 @@ zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+alias ddg-wo-devise="ddg -e devise -e devise_worker"

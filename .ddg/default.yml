@@ -10,11 +10,21 @@ groups:
     - nginx
     - frontend
     - persistence
+    - localstack
   apis:
     - gresb
     - gresb_worker
     - measurabl_reports
     - measurabl_reports_worker
+  measurabl_api:
+    - measurabl_api_app
+    - measurabl_api_worker
+    - nginx # Required by devise to display assets generated in the "frontend" service
+    - devise # Used for Accounts/Portfolios and interface before connecting to devise
+    - frontend # Used by devise to build the assets
+    - persistence # MySQL and Redis used by both devise and measurabl_api
+    - spring_wizard
+    - core_api # Used as the endpoint to Proxy API requests through MeasurablAPI to Wizard
   utilities:
     - cohort_report_scorer
     - estar_sync
@@ -34,22 +44,41 @@ groups:
 default-group: core
 
 services:
+  measurabl_api_app:
+    alias: "measurabl-api"
+    repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/measurabl_api
+    tag: "master"
+    compose:
+      environment:
+        RAILS_RUN_MIGRATIONS: "true"
+        SQL_TIMEOUT_DELAY: "0"
+    container_port: 3000
+    depends_on:
+      - mysql
+  measurabl_api_worker:
+    repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/measurabl_api
+    tag: "master"
+    compose:
+      environment:
+        RAILS_RUN_MIGRATIONS: "false"
+        RAILS_WORKER_MODE: "true"
+        SQL_TIMEOUT_DELAY: "0"
+    depends_on:
+      - mysql
   # Devise entries
   devise:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/devise
-    tag: "9b6e927"
+    tag: "4824842"
     compose:
       environment:
         RAILS_RUN_MIGRATIONS: "false"
         DATABASE_ZUORA_HOST: "mysql"
-        VERSION_JSON_PATH: "/frontend/release/version.json"
       volumes:
         - "devise_logs:/devise/log:delegated"
-        - "frontend-export:/frontend/release:ro"
     container_port: 3000
   devise_worker:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/devise
-    tag: "9b6e927"
+    tag: "4824842"
     compose:
       environment:
         RAILS_WORKER_MODE: "true"
@@ -79,12 +108,12 @@ services:
   frontend:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/frontend
     tag: master
+    container_port: 8088
     compose:
       environment:
         NPM_START: "false"
-      randomkey: "randomvalue"
-      volumes:
-        - "frontend-export:/frontend/export:delegated"
+        FE_NGINX_PORT: "8088"
+
   measurabl_reports:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/msr_reports_api
     tag: master
@@ -100,7 +129,7 @@ services:
         RAILS_WORKER_MODE: "true"
   cohort_report_scorer:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/cohort-report-scorer
-    tag: "47ca40b"
+    tag: "1881473"
     container_port: 10019
     compose:
       environment:
@@ -109,20 +138,33 @@ services:
 
   spring_wizard:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/wizard
-    tag: "47ca40b"
+    tag: "1881473"
     alias: "spring-wizard" # wizard url validator rejects hostnames with underscores
     container_port: 10007
     compose:
       memory: 2G
       cpus: 3.0
 
+  core_api:
+    repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/core-api
+    tag: "master"
+    alias: "core-api" # wizard url validator rejects hostnames with underscores
+    container_port: 10039
+    compose:
+      environment:
+        SERVER_PORT: "10039"
+      memory: 2G
+      cpus: 3.0
+    depends_on:
+      - mysql
+
   pusher:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/pusher
-    tag: "47ca40b"
+    tag: "1881473"
 
   estar_sync:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/estar_sync
-    tag: "47ca40b"
+    tag: "1881473"
     compose:
       memory: 2G
 
@@ -132,7 +174,7 @@ services:
 
   climate_risk_import:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/climate-risk-import
-    tag: "47ca40b"
+    tag: "1881473"
 
   427_connector:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/msr_427connector
@@ -142,7 +184,7 @@ services:
 
   archer:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/archer
-    tag: '47ca40b'
+    tag: '1881473'
     container_port: 10027
 
   nginx:
@@ -150,12 +192,15 @@ services:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/msr_nginx_local
     tag: master
     compose:
-      volumes:
-        - "frontend-export:/frontend/release:ro"
+      environment:
+        FRONTEND_LOCAL_STATIC_NAME: frontend
+        FRONTEND_LOCAL_STATIC_PORT: 8088
+        NGINX_DEFAULT_HOSTNAME: localhost
     container_port: 8080
     host_port: 8080
     depends_on:
       - devise
+      - frontend
 
   nginx_lime:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/msr_nginx_local
@@ -171,7 +216,7 @@ services:
     container_port: 6379
   mysql:
     repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/msr_mysql_local
-    tag: "5.7-5554b41-w-47ca40b-d-9b6e927"
+    tag: "5.7-5bbd808-w-1881473-d-4824842"
     command: --character-set-server=utf8mb4
     compose:
       cpus: 2.2
@@ -186,9 +231,13 @@ services:
     tag: latest
     container_port: 27017
 
+  localstack:
+    repository: 402295273060.dkr.ecr.us-west-2.amazonaws.com/measurabl/localstack-core
+    tag: main
+    container_port: 4566
+    host_port: 4566
+
 # yamllint disable rule:empty-values
 volumes:
-  frontend-export:
-    driver: "local"
   mysql-data:
     driver: "local"
