@@ -3,10 +3,10 @@
 !/.aws
 !/.aws/config
 
-!/.ddg
-!/.ddg/default.yml
-!/.ddg/bin
-!/.ddg/bin/ddg
+!/.gitconfig
 
 !/.zprofile
+!/.zshenv
 !/.zshrc
+
+!/.p10k.zsh

@@ -1,14 +1,17 @@
+# openresty
+export OPENRESTY_PREFIX="/opt/homebrew/Cellar/openresty/1.21.4.2_1"
+export PATH=$OPENRESTY_PREFIX/nginx/sbin:$OPENRESTY_PREFIX/bin:$OPENRESTY_PREFIX/luajit/bin:$PATH
+
+# Terragrunt
+TERRAGRUNT_FAIL_ON_STATE_BUCKET_CREATION=true
+TERRAGRUNT_DISABLE_BUCKET_UPDATE=true
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
-. $(brew --prefix)/opt/asdf/libexec/asdf.sh
-
-# Add direnv to the zsh shell
-eval "$(direnv hook zsh)"
 
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -34,8 +37,23 @@ zinit light-mode for \
 ### End of Zinit's installer chunk
 
 zinit ice depth=1; zinit light romkatv/powerlevel10k
+zinit ice depth=1; zinit load romkatv/powerlevel10k
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+autoload -Uz compinit
+compinit
+
+. $(brew --prefix)/opt/asdf/libexec/asdf.sh
+
+# Add direnv to the zsh shell
+eval "$(direnv hook zsh)"
+
 alias ddg-wo-devise="ddg -e devise -e devise_worker"
+alias gen-ssh-key="ssh-keygen -t ed25519 -C 'trevor.smith@measurabl.com'"
+
+eval "$(op completion zsh)"; compdef _op op
+
+zinit cdreplay -q
+source /Users/trevorsmith/.docker/init-zsh.sh || true # Added by Docker Desktop

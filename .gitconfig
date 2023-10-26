@@ -1,0 +1,18 @@
+[user]
+	email = trevor.smith@measurabl.com
+	name = Trevor Smith
+	signingkey = 81DA548D
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg
+[tag]
+	gpgsign = true
+[core]
+	excludesfile = /Users/trevorsmith/.config/git/ignore
+	autocrlf = input
