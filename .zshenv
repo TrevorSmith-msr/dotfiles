@@ -1,5 +1,7 @@
 . "$HOME/.cargo/env"
 
+export ASDF_GOLANG_MOD_VERSION_ENABLED=true
+
 # openresty
 export OPENRESTY_PREFIX="/opt/homebrew/Cellar/openresty/1.21.4.2_1"
 export PATH=$OPENRESTY_PREFIX/nginx/sbin:$OPENRESTY_PREFIX/bin:$OPENRESTY_PREFIX/luajit/bin:$PATH
@@ -24,3 +26,6 @@ case ":$PATH:" in
   *) export PATH="$PATH:/Users/trevorsmith/bin" ;;
 esac
 # bit end
+
+export TERRAGRUNT_RUN_AS_USER=true
+export TERRAGRUNT_DISABLE_BUCKET_UPDATE=true

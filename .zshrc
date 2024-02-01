@@ -1,11 +1,3 @@
-# openresty
-export OPENRESTY_PREFIX="/opt/homebrew/Cellar/openresty/1.21.4.2_1"
-export PATH=$OPENRESTY_PREFIX/nginx/sbin:$OPENRESTY_PREFIX/bin:$OPENRESTY_PREFIX/luajit/bin:$PATH
-
-# Terragrunt
-TERRAGRUNT_FAIL_ON_STATE_BUCKET_CREATION=true
-TERRAGRUNT_DISABLE_BUCKET_UPDATE=true
-
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -37,7 +29,7 @@ zinit light-mode for \
 ### End of Zinit's installer chunk
 
 zinit ice depth=1; zinit light romkatv/powerlevel10k
-zinit ice depth=1; zinit load romkatv/powerlevel10k
+zinit snippet OMZ::plugins/asdf/asdf.plugin.zsh
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -57,3 +49,12 @@ eval "$(op completion zsh)"; compdef _op op
 
 zinit cdreplay -q
 source /Users/trevorsmith/.docker/init-zsh.sh || true # Added by Docker Desktop
+source /Users/trevorsmith/.config/op/plugins.sh
+
+alias opterragrunt='AWS_ACCESS_KEY_ID="op://Private/Measurabl AWS/access key id" AWS_SECRET_ACCESS_KEY="op://Private/Measurabl AWS/secret access key" op run -- terragrunt'
+alias op-aws-vault='AWS_ACCESS_KEY_ID="op://Private/Measurabl AWS/access key id" AWS_SECRET_ACCESS_KEY="op://Private/Measurabl AWS/secret access key" op run -- aws-vault'
+
+alias tg='terragrunt'
+alias ave='aws-vault exec'
+
+alias docker-full-clean='docker rm $(docker stop $(docker ps -aq)) && docker volume rm $(docker volume ls -q)'
